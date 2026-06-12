@@ -3,6 +3,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+   turbopack: {},
   images: {
     unoptimized: true,
   },
@@ -16,5 +17,4 @@ const nextConfig = {
     return config
   },
 }
-
 export default nextConfig
