@@ -7,6 +7,7 @@ import { Grid3x3, Heart, MessageCircle, X, Bookmark, ChevronLeft, ChevronRight }
 import { cn } from "@/lib/utils"
 import { API_URL, normalizeImageUrl } from "@/lib/api"
 import { FollowsModal } from "./follows-modal"
+import { StoryViewerModal, type Story } from "./stories-bar"
 
 type Comment = { id: number; user: string; avatar: string | null; text: string; time: string }
 type Post = { id: number; image_url: string; caption: string | null; likes: number; comments: Comment[]; liked: boolean; saved: boolean; time: string; author: string; author_avatar: string | null; location: string | null; carousel_urls?: string[] }
@@ -23,6 +24,9 @@ export function PublicProfileContent({ username }: { username: string }) {
   const [activePost, setActivePost] = useState<Post | null>(null)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [showFollowsModal, setShowFollowsModal] = useState<"followers" | "following" | null>(null)
+  const [hasStory, setHasStory] = useState(false)
+  const [storyData, setStoryData] = useState<Story | null>(null)
+  const [activeStory, setActiveStory] = useState<Story | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem("ig_token")
@@ -67,6 +71,25 @@ export function PublicProfileContent({ username }: { username: string }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (postsRes.ok) setPosts(await postsRes.json())
+
+        // Check active story
+        try {
+          const storyRes = await fetch(`${API_URL}/stories/user/${username}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (storyRes.ok) {
+            const story = await storyRes.json()
+            setHasStory(true)
+            setStoryData(story)
+          } else {
+            setHasStory(false)
+            setStoryData(null)
+          }
+        } catch (err) {
+          console.error("Failed to check active story:", err)
+          setHasStory(false)
+          setStoryData(null)
+        }
       })
       .catch((err) => {
         if (err.message !== "unauth") { console.error(err); setError(err.message) }
@@ -121,20 +144,41 @@ export function PublicProfileContent({ username }: { username: string }) {
       <section className="mx-auto w-full max-w-4xl px-4 pb-24 sm:pb-16 pt-6">
         {/* Header */}
         <header className="flex flex-col items-center gap-6 border-b border-border pb-8 sm:flex-row sm:items-start sm:gap-12 sm:px-6">
-          <div className="brand-gradient shrink-0 rounded-full p-[3px]">
-            <div className="rounded-full bg-background p-[3px]">
-              <div className="size-24 overflow-hidden rounded-full sm:size-36">
-                <Image
-                  src={normalizeImageUrl(profile.avatar_url, "/placeholder-user.jpg")}
-                  alt={profile.full_name || profile.username}
-                  width={144}
-                  height={144}
-                  className="size-full object-cover"
-                  priority
-                />
+          {hasStory ? (
+            <button
+              onClick={() => setActiveStory(storyData)}
+              className="brand-gradient shrink-0 rounded-full p-[3px] focus:outline-none transition-transform active:scale-95 cursor-pointer"
+              aria-label="View story"
+            >
+              <div className="rounded-full bg-background p-[3px]">
+                <div className="size-24 overflow-hidden rounded-full sm:size-36">
+                  <Image
+                    src={normalizeImageUrl(profile.avatar_url, "/placeholder-user.jpg")}
+                    alt={profile.full_name || profile.username}
+                    width={144}
+                    height={144}
+                    className="size-full object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+            </button>
+          ) : (
+            <div className="shrink-0 rounded-full p-[3px] bg-secondary/60 border border-border">
+              <div className="rounded-full bg-background p-[3px]">
+                <div className="size-24 overflow-hidden rounded-full sm:size-36">
+                  <Image
+                    src={normalizeImageUrl(profile.avatar_url, "/placeholder-user.jpg")}
+                    alt={profile.full_name || profile.username}
+                    width={144}
+                    height={144}
+                    className="size-full object-cover"
+                    priority
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex w-full flex-col items-center gap-4 sm:items-start">
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
@@ -217,6 +261,18 @@ export function PublicProfileContent({ username }: { username: string }) {
           username={profile.username}
           type={showFollowsModal}
           onClose={() => setShowFollowsModal(null)}
+        />
+      )}
+
+      {activeStory && (
+        <StoryViewerModal
+          story={activeStory}
+          onClose={() => setActiveStory(null)}
+          onDeleted={() => {
+            setHasStory(false)
+            setStoryData(null)
+          }}
+          isOwnStory={false}
         />
       )}
     </>

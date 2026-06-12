@@ -34,6 +34,27 @@ def get_stories(current_user: models.User = Depends(get_current_user), db: Sessi
     return result
 
 
+@router.get("/user/{username}", response_model=schemas.StoryOut)
+def get_user_story(username: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    now = datetime.now(timezone.utc)
+    story = db.query(models.Story).filter(models.Story.author_id == user.id, models.Story.expires_at > now).order_by(models.Story.created_at.desc()).first()
+    if not story:
+        raise HTTPException(status_code=404, detail="No active story for user")
+    liked = any(l.user_id == current_user.id for l in story.likes)
+    return schemas.StoryOut(
+        id=story.id,
+        user="Your story" if story.author_id == current_user.id else story.author.username,
+        avatar=story.author.avatar_url,
+        media_url=story.media_url,
+        liked=liked,
+        views_count=len(story.views),
+        likes_count=len(story.likes)
+    )
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_story(media_url: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     expires_at = datetime.now(timezone.utc) + timedelta(hours=24)

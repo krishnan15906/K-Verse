@@ -161,10 +161,12 @@ export function StoryViewerModal({
   story,
   onClose,
   onDeleted,
+  isOwnStory: isOwnStoryProp,
 }: {
   story: Story
   onClose: () => void
   onDeleted: () => void
+  isOwnStory?: boolean
 }) {
   const [deleting, setDeleting] = useState(false)
   const [liked, setLiked] = useState(story.liked ?? false)
@@ -172,7 +174,7 @@ export function StoryViewerModal({
   const [loadingViewers, setLoadingViewers] = useState(false)
   const [showViewersPanel, setShowViewersPanel] = useState(false)
 
-  const isOwnStory = story.user === "Your story"
+  const isOwnStory = isOwnStoryProp !== undefined ? isOwnStoryProp : story.user === "Your story"
   const token = typeof window !== "undefined" ? (localStorage.getItem("ig_token") ?? "") : ""
 
   // Auto-close timeout only for other people's stories when not interacting
@@ -254,10 +256,6 @@ export function StoryViewerModal({
       role="dialog"
       aria-modal="true"
     >
-      <button onClick={onClose} className="absolute right-4 top-4 text-background/90 hover:text-background z-20">
-        <X className="size-8" />
-      </button>
-
       <div
         className="relative flex flex-col justify-center items-center h-[85vh] w-full max-w-sm overflow-hidden rounded-2xl bg-black shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -275,16 +273,25 @@ export function StoryViewerModal({
           </div>
           <span className="text-sm font-semibold text-white">{story.user}</span>
           
-          {isOwnStory && (
+          <div className="ml-auto flex items-center gap-2">
+            {isOwnStory && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-white/80 hover:text-red-500 transition-colors p-1 cursor-pointer"
+                aria-label="Delete story"
+              >
+                <Trash2 className="size-5" />
+              </button>
+            )}
             <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="ml-auto text-white/80 hover:text-red-500 transition-colors p-1"
-              aria-label="Delete story"
+              onClick={onClose}
+              className="text-white/85 hover:text-white transition-colors p-1 cursor-pointer"
+              aria-label="Close story"
             >
-              <Trash2 className="size-5" />
+              <X className="size-5" />
             </button>
-          )}
+          </div>
         </div>
 
         {/* Media */}

@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Dancing_Script } from 'next/font/google'
 import './globals.css'
+import { ThemeInitializer } from '@/components/theme-initializer'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
@@ -44,35 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} bg-background`} suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const token = localStorage.getItem('ig_token');
-                  let userId = null;
-                  if (token) {
-                    const parts = token.split('.');
-                    if (parts.length === 3) {
-                      userId = JSON.parse(atob(parts[1])).sub;
-                    }
-                  }
-                  const theme = userId ? (localStorage.getItem('theme_' + userId) || 'dark') : 'dark';
-                  if (theme === 'light') {
-                    document.documentElement.classList.add('light');
-                    document.documentElement.classList.remove('dark');
-                  } else {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.classList.remove('light');
-                  }
-                } catch (e) {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.classList.remove('light');
-                }
-              })()
-            `
-          }}
-        />
+        <ThemeInitializer />
       </head>
       <body className="font-sans antialiased">
         {children}

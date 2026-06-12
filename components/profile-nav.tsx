@@ -1151,7 +1151,7 @@ export function ProfileNav() {
 
   function goToUser(username: string) {
     setSearchOpen(false)
-    router.push(`/u/${username}`)
+    window.location.href = `/u/${username}`
   }
 
   return (
@@ -1166,9 +1166,9 @@ export function ProfileNav() {
           <div className="flex items-center gap-4 text-foreground">
             {/* Desktop-only Nav Icons (Part 1) */}
             <div className="hidden sm:flex items-center gap-5">
-              <Link href="/home" aria-label="Home" className="transition-colors hover:text-[var(--brand-via)]">
+              <a href="/home" aria-label="Home" className="transition-colors hover:text-[var(--brand-via)]">
                 <Home className="size-6" />
-              </Link>
+              </a>
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
@@ -1206,7 +1206,7 @@ export function ProfileNav() {
                       notifications.map((n: any) => (
                         <div key={n.id} className="flex items-center justify-between gap-3 border-b border-border/40 p-3 hover:bg-secondary/40 transition-colors">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <Link href={`/u/${n.actor_username}`} className="shrink-0" onClick={() => setNotificationOpen(false)}>
+                            <a href={`/u/${n.actor_username}`} className="shrink-0" onClick={() => setNotificationOpen(false)}>
                               <div className="relative size-8 overflow-hidden rounded-full border border-border bg-secondary">
                                 <Image
                                   src={normalizeImageUrl(n.actor_avatar, "/placeholder-user.jpg")}
@@ -1217,11 +1217,11 @@ export function ProfileNav() {
                                   unoptimized
                                 />
                               </div>
-                            </Link>
+                            </a>
                             <div className="min-w-0 flex-1 text-xs leading-snug">
-                              <Link href={`/u/${n.actor_username}`} className="font-semibold hover:underline text-foreground" onClick={() => setNotificationOpen(false)}>
+                              <a href={`/u/${n.actor_username}`} className="font-semibold hover:underline text-foreground" onClick={() => setNotificationOpen(false)}>
                                 {n.actor_username}
-                              </Link>{" "}
+                              </a>{" "}
                               <span className="text-muted-foreground">
                                 {n.type === "like" && "liked your photo."}
                                 {n.type === "comment" && "commented on your post."}
@@ -1236,7 +1236,7 @@ export function ProfileNav() {
 
                           {/* Right preview/follow link */}
                           {n.post_image_url && (
-                            <Link href="/profile" className="shrink-0 shadow-sm" onClick={() => setNotificationOpen(false)}>
+                            <a href="/profile" className="shrink-0 shadow-sm" onClick={() => setNotificationOpen(false)}>
                               <div className="relative size-8 overflow-hidden rounded bg-secondary border border-border">
                                 <Image
                                   src={normalizeImageUrl(n.post_image_url, "/placeholder.svg")}
@@ -1247,7 +1247,7 @@ export function ProfileNav() {
                                   unoptimized
                                 />
                               </div>
-                            </Link>
+                            </a>
                           )}
                         </div>
                       ))
@@ -1267,9 +1267,9 @@ export function ProfileNav() {
               >
                 <Plus className="size-6" />
               </button>
-              <Link href="/profile" aria-label="My profile" className="transition-colors hover:text-[var(--brand-via)]">
+              <a href="/profile" aria-label="My profile" className="transition-colors hover:text-[var(--brand-via)]">
                 <User className="size-6" />
-              </Link>
+              </a>
               <button onClick={handleLogout} aria-label="Log out" className="transition-colors hover:text-[var(--brand-via)] cursor-pointer">
                 <LogOut className="size-6" />
               </button>
@@ -1289,9 +1289,9 @@ export function ProfileNav() {
 
       {/* Fixed Bottom Navigation Bar for Mobile View */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-border bg-card/85 backdrop-blur-md px-6 text-foreground sm:hidden">
-        <Link href="/home" aria-label="Home" className="transition-colors hover:text-[var(--brand-via)]">
+        <a href="/home" aria-label="Home" className="transition-colors hover:text-[var(--brand-via)]">
           <Home className="size-6" />
-        </Link>
+        </a>
         <button
           onClick={() => setSearchOpen(true)}
           aria-label="Search"
@@ -1306,9 +1306,9 @@ export function ProfileNav() {
         >
           <Plus className="size-6" />
         </button>
-        <Link href="/profile" aria-label="My profile" className="transition-colors hover:text-[var(--brand-via)]">
+        <a href="/profile" aria-label="My profile" className="transition-colors hover:text-[var(--brand-via)]">
           <User className="size-6" />
-        </Link>
+        </a>
         <button onClick={handleLogout} aria-label="Log out" className="transition-colors hover:text-[var(--brand-via)] cursor-pointer">
           <LogOut className="size-6" />
         </button>

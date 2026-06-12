@@ -379,26 +379,13 @@ export function ProfileContent() {
   const [activeStory, setActiveStory] = useState<Story | null>(null)
   const [showCreateStory, setShowCreateStory] = useState(false)
   const [showFollowsModal, setShowFollowsModal] = useState<"followers" | "following" | null>(null)
+  const [hasStory, setHasStory] = useState(false)
+  const [myStoryData, setMyStoryData] = useState<Story | null>(null)
 
   async function handleAvatarClick() {
-    const token = localStorage.getItem("ig_token")
-    if (!token) return
-    try {
-      const res = await fetch(`${API_URL}/stories`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (res.ok) {
-        const data: Story[] = await res.json()
-        const myActiveStory = data.find((s) => s.user === "Your story")
-        if (myActiveStory) {
-          setActiveStory(myActiveStory)
-        } else {
-          setShowCreateStory(true)
-        }
-      } else {
-        setShowCreateStory(true)
-      }
-    } catch {
+    if (hasStory && myStoryData) {
+      setActiveStory(myStoryData)
+    } else {
       setShowCreateStory(true)
     }
   }
@@ -417,6 +404,25 @@ export function ProfileContent() {
       })
       .then((user: UserProfile) => {
         setProfile(user)
+        
+        fetch(`${API_URL}/stories/user/${user.username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then((res) => res.ok ? res.json() : null)
+          .then((storyData) => {
+            if (storyData) {
+              setHasStory(true)
+              setMyStoryData(storyData)
+            } else {
+              setHasStory(false)
+              setMyStoryData(null)
+            }
+          })
+          .catch(() => {
+            setHasStory(false)
+            setMyStoryData(null)
+          })
+
         return fetch(`${API_URL}/profile/${user.username}/posts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -489,8 +495,11 @@ export function ProfileContent() {
         <header className="flex flex-col items-center gap-6 border-b border-border pb-8 sm:flex-row sm:items-start sm:gap-12 sm:px-6">
           <button
             onClick={handleAvatarClick}
-            className="brand-gradient shrink-0 rounded-full p-[3px] focus:outline-none transition-transform active:scale-95 cursor-pointer"
-            aria-label="View or add to story"
+            className={cn(
+              "shrink-0 rounded-full p-[3px] focus:outline-none transition-transform active:scale-95 cursor-pointer",
+              hasStory ? "brand-gradient" : "bg-secondary/60 hover:bg-secondary border border-border"
+            )}
+            aria-label={hasStory ? "View story" : "Add to story"}
           >
             <div className="rounded-full bg-background p-[3px]">
               <div className="size-24 overflow-hidden rounded-full sm:size-36">
@@ -612,6 +621,20 @@ export function ProfileContent() {
         <CreateStoryModal
           onClose={() => setShowCreateStory(false)}
           onCreated={() => {
+            if (profile) {
+              const token = localStorage.getItem("ig_token") ?? ""
+              fetch(`${API_URL}/stories/user/${profile.username}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              })
+                .then((r) => r.ok ? r.json() : null)
+                .then((storyData) => {
+                  if (storyData) {
+                    setHasStory(true)
+                    setMyStoryData(storyData)
+                  }
+                })
+                .catch(() => {})
+            }
             router.refresh()
           }}
         />
@@ -622,8 +645,11 @@ export function ProfileContent() {
           story={activeStory}
           onClose={() => setActiveStory(null)}
           onDeleted={() => {
+            setHasStory(false)
+            setMyStoryData(null)
             router.refresh()
           }}
+          isOwnStory={true}
         />
       )}
 
