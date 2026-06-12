@@ -6,6 +6,7 @@ from app.config import settings
 # psycopg3 uses the "postgresql+psycopg" driver prefix
 _url = settings.database_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
+
 engine = create_engine(_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
