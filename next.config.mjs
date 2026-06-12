@@ -4,10 +4,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
    
-  turbopack: {},
-  experimental: {
-    turbo: false
-  },
+
 
   images: {
     unoptimized: true,
