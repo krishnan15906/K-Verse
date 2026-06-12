@@ -19,12 +19,16 @@ app = FastAPI(
     description="FastAPI + PostgreSQL backend for K-Verse",
 )
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://k-verse-ml3larpzy-krishnan15906-9139s-projects.vercel.app",
-        "https://k-verse.vercel.app"
+        "https://k-verse.vercel.app",
+        "https://k-verse-ml3larpzy-krishnan15906-9139s-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
