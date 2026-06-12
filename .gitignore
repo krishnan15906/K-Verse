@@ -17,4 +17,6 @@ node_modules
 # Python backend
 backend/venv/
 backend/__pycache__/
+.env
+.env.*
 backend/.env
